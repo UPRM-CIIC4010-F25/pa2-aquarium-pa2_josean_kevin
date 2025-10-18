@@ -98,17 +98,17 @@ void ofApp::keyPressed(int key){
     if(gameManager->GetActiveSceneName() == GameSceneKindToString(GameSceneKind::AQUARIUM_GAME)){
         auto gameScene = std::static_pointer_cast<AquariumGameScene>(gameManager->GetActiveScene());
         switch(key){
-            case 'w'|| 'W':
+            case 'w':
                 gameScene->GetPlayer()->setDirection(gameScene->GetPlayer()->isXDirectionActive()?gameScene->GetPlayer()->getDx():0, -1);
                 break;
-                case 's' || 'S':
+                case 's':
                 gameScene->GetPlayer()->setDirection(gameScene->GetPlayer()->isXDirectionActive()?gameScene->GetPlayer()->getDx():0, 1);
                 break;
-            case 'a' || 'A':
+            case 'a':
                 gameScene->GetPlayer()->setDirection(-1, gameScene->GetPlayer()->isYDirectionActive()?gameScene->GetPlayer()->getDy():0);
                 gameScene->GetPlayer()->setFlipped(true);
                 break;
-                case 'd' || 'D':
+                case 'd':
                 gameScene->GetPlayer()->setDirection(1, gameScene->GetPlayer()->isYDirectionActive()?gameScene->GetPlayer()->getDy():0);
                 gameScene->GetPlayer()->setFlipped(false);
                 break;

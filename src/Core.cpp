@@ -12,7 +12,7 @@ void Creature::normalize() {
 }
 
 void Creature::bounce() {
-    float radius = m_collisionRadius();
+    float radius = m_collisionRadius;
     if(m_x - radius < 0){
         m_x = radius;
         m_dx = std::abs(m_dx);
