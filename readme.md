@@ -25,7 +25,7 @@ Grading
 | Student Number | Student Name | Student Email |
 |-|-|-|
 |802-23-1780| Josean Ralat| josean.ralat@upr.edu |
-|(STUDENT NUMBER HERE)| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
+|802-23-9257| Kevin Rodriguez Colon| kevin.rodriguez85@upr.edu |
 
 ---
 
