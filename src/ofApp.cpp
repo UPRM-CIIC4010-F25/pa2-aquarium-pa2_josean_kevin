@@ -7,7 +7,12 @@ void ofApp::setup(){
     ofSetBackgroundColor(ofColor::blue);
     backgroundImage.load("background.png");
     backgroundImage.resize(ofGetWindowWidth(), ofGetWindowHeight());
-
+    if (!music.load("under_the_sea.mp3")) {
+        ofLogError() << "Failed to load under_the_sea.mp3!";
+    } else {
+        music.setLoop(true);
+        music.setVolume(0.5f);
+    }
 
     std::shared_ptr<Aquarium> myAquarium;
     std::shared_ptr<PlayerCreature> player;
@@ -58,7 +63,15 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
+    if(gameManager->GetActiveSceneName() == GameSceneKindToString(GameSceneKind::AQUARIUM_GAME)) {
+        if(music.isLoaded() && !music.isPlaying()) {
+            music.play();
+        }
+    }
+    else if(music.isPlaying()) {
+        music.setPaused(true);
+    }
+
     if(gameManager->GetActiveSceneName() == GameSceneKindToString(GameSceneKind::GAME_OVER)){
         return; // Stop updating if game is over or exiting
     }
