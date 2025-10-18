@@ -12,7 +12,23 @@ void Creature::normalize() {
 }
 
 void Creature::bounce() {
-    // should implement boundary controls here
+    float radius = m_collisionRadius();
+    if(m_x - radius < 0){
+        m_x = radius;
+        m_dx = std::abs(m_dx);
+    }
+    if(m_x + radius> m_width){
+        m_x = m_width - radius;
+        m_dx = -std::abs(m_dx);
+    }
+    if(m_y - radius< 0){
+        m_y = radius;
+        m_dy = std::abs(m_dy);
+    }
+    if(m_y + radius> m_height){
+        m_y = m_height - radius;
+        m_dy = -std::abs(m_dy);
+    }
 }
 
 
@@ -48,11 +64,61 @@ void GameEvent::print() const {
 
 // collision detection between two creatures
 bool checkCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b) {
-    return false; 
+    if(!a||!b)
+    {return false;}
+    float dx = a->getX() - b->getX();
+    float dy = a->getY() - b->getY();
+    float distance = std::sqrt(dx*dx + dy*dy);
+    float collisionDistance = a->getCollisionRadius() + b->getCollisionRadius();
+
+    if(distance < collisionDistance){
+        return true;
+    }
+    return false;
 };
+void resolveCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b,float ela){
+    float dx = a->getX() - b->getX();
+    float dy = a->getY() - b->getY();
+    float distance = sqrt(dx*dx + dy*dy);
 
+    if(distance <0.1f){
+        distance = 1.0f;
+    }
+    float nx = dx/distance;
+    float ny = dy/distance;
 
-string GameSceneKindToString(GameSceneKind t){
+    float velX = (a->getDx()*a->getSpeed())- (b->getDx()*b->getSpeed());
+    float velY = (a->getDy() * a->getSpeed()) - (b->getDy() * b->getSpeed());
+    float normVel = velX*nx + velY*ny;
+    if(normVel > 0){
+        return;
+    }
+
+    float impulse = -(1.0f + ela)*normVel;
+    impulse /= 2.0f;
+
+    float impulseX = impulse*nx;
+    float impulseY = impulse*ny;
+
+    float newDirXA = a->getDx() + impulseX / a->getSpeed();
+    float newDirYA = a->getDy() + impulseY / a->getSpeed();
+    a->setDirection(newDirXA,newDirYA);
+
+    float newDirXB = b->getDx() - impulseX/ b->getSpeed();
+    float newDirYB = b->getDy() - impulseY / b->getSpeed();
+    b->setDirection(newDirXB,newDirYB);
+
+    float overlap = (a->getCollisionRadius() + b->getCollisionRadius()) - distance;
+    if(overlap > 0){
+        float distanceX = nx*overlap*0.5f;
+        float distanceY = ny*overlap*0.5f;
+        a->setPosition(a->getX() + distanceX, a->getY() + distanceY);
+        b->setPosition(b->getX()- distanceX, b->getY() - distanceY);
+    }
+}
+
+    string GameSceneKindToString(GameSceneKind t)
+{
     switch(t)
     {
         case GameSceneKind::GAME_INTRO: return "GAME_INTRO";

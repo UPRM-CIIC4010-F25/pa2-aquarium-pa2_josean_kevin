@@ -31,6 +31,8 @@ public:
         m_image.resize(width, height);
         m_flippedImage = m_image;
         m_flippedImage.mirror(false, true); // Mirror horizontally
+        m_spriteW = m_image.getWidth();
+        m_spriteH = m_image.getHeight();
     }
 
     void draw(float x, float y) const {
@@ -42,11 +44,15 @@ public:
     }
 
     void setFlipped(bool flipped) { m_flipped = flipped; }
+    float getWidth() const {return m_spriteW;}
+    float getHeight() const {return m_spriteH;}
 
 private:
     ofImage m_image;
     ofImage m_flippedImage;
     bool m_flipped = false;
+    float m_spriteW = 0.0f;
+    float m_spriteH = 0.0f;
 };
 
 
@@ -76,7 +82,6 @@ protected:
     float m_collisionRadius = 0.0f;
     int m_value = 0;
     std::shared_ptr<GameSprite> m_sprite;
-
 public:
     virtual ~Creature() = default;
     virtual void move() = 0;
@@ -100,7 +105,19 @@ public:
     void setBounds(int w, int h);
     void normalize();
     void bounce();
+    float getDx() const {return m_dx;}
+    float getDy() const {return m_dy;}
+    void setDirection(float dx, float dy){
+        m_dx = dx;
+        m_dy = dy;
+        normalize();
+    }
+    void setPosition(float x, float y){
+        m_x = x;
+        m_y = y;
+    }
 };
+
 
 // GameEvents
 enum class GameEventType {
@@ -141,9 +158,10 @@ class GameEvent {
 
 
 bool checkCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b);
+void resolveCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b, float ela);
 
-
-class GameLevel {
+    class GameLevel
+{
 public:
     GameLevel(int levelNumber) : m_levelNumber(levelNumber) {}
     virtual ~GameLevel() = default;
@@ -152,11 +170,7 @@ public:
 
 protected:
     int m_levelNumber;
-    
 };
-
-
-
 
 class GameScene {
     public:

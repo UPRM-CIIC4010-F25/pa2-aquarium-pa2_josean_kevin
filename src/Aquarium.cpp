@@ -15,7 +15,7 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
 
 // PlayerCreature Implementation
 PlayerCreature::PlayerCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
-: Creature(x, y, speed, 10.0f, 1, sprite) {}
+: Creature(x, y, speed, 35.0f, 1, sprite) {}
 
 
 void PlayerCreature::setDirection(float dx, float dy) {
@@ -73,7 +73,7 @@ void PlayerCreature::loseLife(int debounce) {
 
 // NPCreature Implementation
 NPCreature::NPCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
-: Creature(x, y, speed, 30, 1, sprite) {
+: Creature(x, y, speed, 35.0f, 1, sprite) {
     m_dx = (rand() % 3 - 1); // -1, 0, or 1
     m_dy = (rand() % 3 - 1); // -1, 0, or 1
     normalize();
@@ -288,6 +288,7 @@ void AquariumGameScene::Update(){
                 if(this->m_player->getPower() < event->creatureB->getValue()){
                     ofLogNotice() << "Player is too weak to eat the creature!" << std::endl;
                     this->m_player->loseLife(3*60); // 3 frames debounce, 3 seconds at 60fps
+                    resolveCollision(this->m_player, event->creatureB, 1.0f);
                     if(this->m_player->getLives() <= 0){
                         this->m_lastEvent = std::make_shared<GameEvent>(GameEventType::GAME_OVER, this->m_player, nullptr);
                         return;
@@ -307,6 +308,16 @@ void AquariumGameScene::Update(){
 
             } else {
                 ofLogError() << "Error: creatureB is null in collision event." << std::endl;
+            }
+        }
+        for(int i = 0; i < this->m_aquarium->getCreatureCount();++i){
+            for(int j = i + 1; j < this->m_aquarium->getCreatureCount(); ++j){
+                shared_ptr<Creature> npcA = this->m_aquarium->getCreatureAt(i);
+                shared_ptr<Creature> npcB = this->m_aquarium->getCreatureAt(j);
+
+                if(npcA && npcB && checkCollision(npcA,npcB)){
+                    resolveCollision(npcA,npcB,0.5f);
+                }
             }
         }
         this->m_aquarium->update();

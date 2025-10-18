@@ -157,7 +157,7 @@ class AquariumGameScene : public GameScene {
         std::shared_ptr<Aquarium> m_aquarium;
         std::shared_ptr<GameEvent> m_lastEvent;
         string m_name;
-        AwaitFrames updateControl{5};
+        AwaitFrames updateControl{1};
 };
 
 
