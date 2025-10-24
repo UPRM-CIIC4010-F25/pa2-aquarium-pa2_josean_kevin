@@ -281,6 +281,7 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             break;
         case AquariumCreatureType::GiantFish:
             this->addCreature(std::make_shared<GiantFish>(x,y,speed,this->m_sprite_manager->GetSprite(AquariumCreatureType::GiantFish)));
+            break;
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
@@ -472,6 +473,40 @@ std::vector<AquariumCreatureType> Level_2::Repopulate() {
         int delta = node->population - node->currentPopulation;
         if(delta >0){
             for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+std::vector<AquariumCreatureType> Level_3::Repopulate()
+{
+    std::vector<AquariumCreatureType> toRepopulate;
+    for (std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation)
+    {
+        int delta = node->population - node->currentPopulation;
+        if (delta > 0)
+        {
+            for (int i = 0; i < delta; i++)
+            {
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+std::vector<AquariumCreatureType> Level_4::Repopulate()
+{
+    std::vector<AquariumCreatureType> toRepopulate;
+    for (std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation)
+    {
+        int delta = node->population - node->currentPopulation;
+        if (delta > 0)
+        {
+            for (int i = 0; i < delta; i++)
+            {
                 toRepopulate.push_back(node->creatureType);
             }
             node->currentPopulation += delta;
