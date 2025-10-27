@@ -29,8 +29,8 @@ void PlayerCreature::setDirection(float dx, float dy) {
 }
 
 void PlayerCreature::move() {
-    m_x += m_dx * m_speed;
-    m_y += m_dy * m_speed;
+    m_x += m_dx * m_speed * m_speedMultiplier;
+    m_y += m_dy * m_speed * m_speedMultiplier;
     this->bounce();
 }
 
@@ -45,12 +45,27 @@ void PlayerCreature::update() {
     this->move();
 }
 
+void PlayerCreature::updatePowerUp(float deltaTime) {
+    if (m_powerUpTimer > 0) {
+        m_powerUpTimer -= deltaTime;
+        if (m_powerUpTimer <= 0) {
+            m_speedMultiplier = 1.0f;
+            m_invincible = false;
+        }
+    }
+}
 
 void PlayerCreature::draw() const {
     
     ofLogVerbose() << "PlayerCreature at (" << m_x << ", " << m_y << ") with speed " << m_speed << std::endl;
-    if (this->m_damage_debounce > 0) {
+    if (m_invincible) {
+        ofSetColor(255, 100, 100);
+    }
+    else if (this->m_damage_debounce > 0) {
         ofSetColor(ofColor::red); // Flash red if in damage debounce
+    }
+    else{
+        ofSetColor(ofColor::white);    
     }
     if (m_sprite) {
         m_sprite->draw(m_x, m_y);
@@ -64,6 +79,10 @@ void PlayerCreature::changeSpeed(int speed) {
 }
 
 void PlayerCreature::loseLife(int debounce) {
+     if (m_invincible) {
+        return;
+    }
+
     if (m_damage_debounce <= 0) {
         if (m_lives > 0) this->m_lives -= 1;
         m_damage_debounce = debounce; // Set debounce frames
@@ -338,6 +357,23 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
 //  Imlementation of the AquariumScene
 
 void AquariumGameScene::Update(){
+    float deltaTime = 1.0f / 60.0f;
+    if (powerUpTextTimer > 0) {
+        powerUpTextTimer -= deltaTime;
+    }
+    m_player->updatePowerUp(1.0f/60.0f);
+    
+    if (!powerUpActive) {
+        powerUpSpawnTimer -= deltaTime;
+        if (powerUpSpawnTimer <= 0) {
+            spawnPowerUp();
+        }
+    }
+    
+    if (powerUpActive && checkPowerUpCollision()) {
+        applyPowerUpToPlayer();
+    }
+
     std::shared_ptr<GameEvent> event;
 
     this->m_player->update();
@@ -391,6 +427,21 @@ void AquariumGameScene::Update(){
 void AquariumGameScene::Draw() {
     this->m_player->draw();
     this->m_aquarium->draw();
+    if (powerUpActive) {
+        if (powerUpType == 0) {
+            ofSetColor(255, 0, 0);
+        } 
+        else {
+            ofSetColor(0, 100, 255);
+        }
+        ofDrawCircle(powerUpPosition, 20);
+        ofSetColor(255, 255, 255);
+    }
+     if (powerUpTextTimer > 0) {
+        ofSetColor(255, 255, 0); 
+        ofDrawBitmapString(powerUpText, ofGetWidth()/2 - 50, 50);
+        ofSetColor(255, 255, 255);
+    }
     this->paintAquariumHUD();
 
 }
@@ -513,4 +564,35 @@ std::vector<AquariumCreatureType> Level_4::Repopulate()
         }
     }
     return toRepopulate;
+}
+void AquariumGameScene::spawnPowerUp() {
+    powerUpActive = true;
+    powerUpPosition.x = ofRandom(100, ofGetWidth() - 100);
+    powerUpPosition.y = ofRandom(100, ofGetHeight() - 100);
+    powerUpType = ofRandom(0, 2);
+}
+
+bool AquariumGameScene::checkPowerUpCollision() {
+    ofVec2f playerPos(m_player->getX(), m_player->getY());
+    float distance = playerPos.distance(powerUpPosition);
+    return distance < 50.0f;
+}
+
+void AquariumGameScene::applyPowerUpToPlayer() {
+    if (powerUpType == 0) {
+        m_player->setSpeedMultiplier(2.0f);
+        m_player->setPowerUpTimer(8.0f);
+        showPowerUpText("SPEED BOOST! x2");
+    } else {
+        m_player->setInvincible(true);
+        m_player->setPowerUpTimer(5.0f);
+        showPowerUpText("INVINCIBILITY!");
+    }
+    
+    powerUpActive = false;
+    powerUpSpawnTimer = 20.0f;
+}
+void AquariumGameScene::showPowerUpText(string text) {
+    powerUpText = text;
+    powerUpTextTimer = 3.0f; // Show for 3 seconds
 }

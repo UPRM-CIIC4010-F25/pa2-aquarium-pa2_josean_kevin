@@ -69,12 +69,19 @@ public:
     void loseLife(int debounce);
     void increasePower(int value) { m_power += value; }
     void reduceDamageDebounce();
-    
+    void setSpeedMultiplier(float multiplier) { m_speedMultiplier = multiplier; }
+    void setPowerUpTimer(float time) { m_powerUpTimer = time; }
+    void setInvincible(bool invincible) { m_invincible = invincible; }
+    void updatePowerUp(float deltaTime);
+
 private:
     int m_score = 0;
     int m_lives = 3;
     int m_power = 1; // mark current power lvl
     int m_damage_debounce = 0; // frames to wait after eating
+    float m_speedMultiplier = 1.0f;
+    float m_powerUpTimer = 0.0f;
+    bool m_invincible = false;
 };
 
 class NPCreature : public Creature {
@@ -168,11 +175,21 @@ class AquariumGameScene : public GameScene {
         void Draw() override;
     private:
         void paintAquariumHUD();
+        void spawnPowerUp();
+        bool checkPowerUpCollision();
+        void applyPowerUpToPlayer();
         std::shared_ptr<PlayerCreature> m_player;
         std::shared_ptr<Aquarium> m_aquarium;
         std::shared_ptr<GameEvent> m_lastEvent;
         string m_name;
         AwaitFrames updateControl{1};
+        float powerUpSpawnTimer = 15.0f;
+        bool powerUpActive = false;
+        ofVec2f powerUpPosition;
+        int powerUpType = 0;
+        float powerUpTextTimer = 0.0f;
+        string powerUpText = "";
+        void showPowerUpText(string text);
 };
 
 
